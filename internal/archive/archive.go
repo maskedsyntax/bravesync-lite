@@ -11,15 +11,25 @@ import (
 )
 
 // CreateArchive takes source files and creates a tar.gz archive as a byte slice.
+// It skips files that do not exist.
 func CreateArchive(files []string) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	gw := gzip.NewWriter(buf)
 	tw := tar.NewWriter(gw)
 
+	added := 0
 	for _, file := range files {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			continue
+		}
 		if err := addToTar(tw, file); err != nil {
 			return nil, err
 		}
+		added++
+	}
+
+	if added == 0 {
+		return nil, fmt.Errorf("no files found to archive")
 	}
 
 	if err := tw.Close(); err != nil {
@@ -60,6 +70,10 @@ func ExtractArchive(archiveData []byte, targetDir string) error {
 				return fmt.Errorf("failed to create directory: %w", err)
 			}
 		case tar.TypeReg:
+			// Ensure parent directory exists
+			if err := os.MkdirAll(filepath.Dir(target), 0700); err != nil {
+				return fmt.Errorf("failed to create parent directory: %w", err)
+			}
 			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR|os.O_TRUNC, os.FileMode(header.Mode))
 			if err != nil {
 				return fmt.Errorf("failed to create file: %w", err)
