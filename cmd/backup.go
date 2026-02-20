@@ -56,6 +56,16 @@ func BackupAction(c *cli.Context) error {
 		return err
 	}
 
+	// Prepare Git Repo first to ensure directory exists
+	fmt.Println("Preparing Git repository...")
+	gm := github.NewGitManager(cfg.GitHubRepoURL, cfg.LocalClonePath, cfg.Branch, cfg.PAT)
+	if err := gm.Clone(); err != nil {
+		return err
+	}
+	if err := gm.Pull(); err != nil {
+		fmt.Printf("Warning: pull failed: %v\n", err)
+	}
+
 	timestamp := time.Now().Format("20060102-150405")
 	filename := fmt.Sprintf("backup-%s.enc", timestamp)
 	localFilePath := filepath.Join(cfg.LocalClonePath, filename)
@@ -71,14 +81,6 @@ func BackupAction(c *cli.Context) error {
 	}
 
 	fmt.Println("Pushing to GitHub...")
-	gm := github.NewGitManager(cfg.GitHubRepoURL, cfg.LocalClonePath, cfg.Branch, cfg.PAT)
-	if err := gm.Clone(); err != nil {
-		return err
-	}
-	if err := gm.Pull(); err != nil {
-		fmt.Printf("Warning: pull failed: %v\n", err)
-	}
-
 	if err := gm.AddCommitPush(filename, fmt.Sprintf("Backup %s", timestamp)); err != nil {
 		return err
 	}
