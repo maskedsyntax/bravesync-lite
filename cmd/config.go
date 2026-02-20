@@ -32,6 +32,7 @@ func ConfigAction(c *cli.Context) error {
 		cfg = &config.Config{
 			LocalClonePath: defaultLocal,
 			Branch:         "main",
+			Browser:        "Brave",
 			Encryption: config.EncryptionConfig{
 				KDF:        "argon2id",
 				Iterations: 1,
@@ -43,16 +44,21 @@ func ConfigAction(c *cli.Context) error {
 	localPath := c.String("local")
 	branch := c.String("branch")
 	pat := c.String("pat")
+	browser := c.String("browser")
 
 	// If no flags are provided, enter interactive mode
-	if repoURL == "" && localPath == "" && branch == "" && pat == "" {
+	if repoURL == "" && localPath == "" && branch == "" && pat == "" && browser == "" {
 		fmt.Println("Entering interactive configuration mode. Press enter to keep current values.")
+		cfg.Browser = promptInput("Browser (Brave/Helium)", cfg.Browser)
 		cfg.GitHubRepoURL = promptInput("GitHub Repo URL", cfg.GitHubRepoURL)
 		cfg.LocalClonePath = promptInput("Local Clone Path", cfg.LocalClonePath)
 		cfg.Branch = promptInput("Branch", cfg.Branch)
 		cfg.PAT = promptInput("GitHub PAT (leave blank to use BRAVE_SYNC_PAT env var)", cfg.PAT)
 	} else {
 		// Update only provided flags
+		if browser != "" {
+			cfg.Browser = browser
+		}
 		if repoURL != "" {
 			cfg.GitHubRepoURL = repoURL
 		}

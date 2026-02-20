@@ -38,11 +38,12 @@ func BackupAction(c *cli.Context) error {
 	}
 	defer utils.ZeroMem([]byte(password))
 
-	bookmarkPath, loginDataPath, err := paths.GetBraveFiles()
+	bookmarkPath, loginDataPath, err := paths.GetBrowserFiles(cfg.Browser)
 	if err != nil {
 		return err
 	}
 
+	fmt.Printf("Backing up %s data...\n", cfg.Browser)
 	fmt.Println("Creating archive...")
 	archiveData, err := archive.CreateArchive([]string{bookmarkPath, loginDataPath})
 	if err != nil {
@@ -81,10 +82,10 @@ func BackupAction(c *cli.Context) error {
 	}
 
 	fmt.Println("Pushing to GitHub...")
-	if err := gm.AddCommitPush(filename, fmt.Sprintf("Backup %s", timestamp)); err != nil {
+	if err := gm.AddCommitPush(filename, fmt.Sprintf("Backup %s %s", cfg.Browser, timestamp)); err != nil {
 		return err
 	}
-	if err := gm.AddCommitPush("latest.enc", fmt.Sprintf("Update latest backup %s", timestamp)); err != nil {
+	if err := gm.AddCommitPush("latest.enc", fmt.Sprintf("Update latest backup %s %s", cfg.Browser, timestamp)); err != nil {
 		return err
 	}
 

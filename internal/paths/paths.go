@@ -7,23 +7,35 @@ import (
 )
 
 const (
-	BraveConfigPath = ".config/BraveSoftware/Brave-Browser/Default"
-	BookmarksFile   = "Bookmarks"
-	LoginDataFile   = "Login Data"
+	BraveConfigPath  = ".config/BraveSoftware/Brave-Browser/Default"
+	HeliumConfigPath = ".config/net.imput.helium/Default"
+	BookmarksFile    = "Bookmarks"
+	LoginDataFile    = "Login Data"
 )
 
-// GetBraveProfilePath returns the path to the Brave profile directory.
-func GetBraveProfilePath() (string, error) {
+// GetBrowserProfilePath returns the path to the specified browser's profile directory.
+func GetBrowserProfilePath(browserName string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("could not get user home directory: %w", err)
 	}
-	return filepath.Join(home, BraveConfigPath), nil
+
+	var relPath string
+	switch browserName {
+	case "Helium":
+		relPath = HeliumConfigPath
+	case "Brave":
+		fallthrough
+	default:
+		relPath = BraveConfigPath
+	}
+
+	return filepath.Join(home, relPath), nil
 }
 
-// GetBraveFiles returns the absolute paths to Bookmarks and Login Data.
-func GetBraveFiles() (string, string, error) {
-	profilePath, err := GetBraveProfilePath()
+// GetBrowserFiles returns the absolute paths to Bookmarks and Login Data for the browser.
+func GetBrowserFiles(browserName string) (string, string, error) {
+	profilePath, err := GetBrowserProfilePath(browserName)
 	if err != nil {
 		return "", "", err
 	}

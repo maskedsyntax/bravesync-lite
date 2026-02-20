@@ -24,6 +24,7 @@ type Config struct {
 	GitHubRepoURL  string           `json:"github_repo_url"`
 	LocalClonePath string           `json:"local_clone_path"`
 	Branch         string           `json:"branch"`
+	Browser        string           `json:"browser"` // "Brave" or "Helium"
 	Encryption     EncryptionConfig `json:"encryption"`
 	PAT            string           `json:"pat,omitempty"`
 }

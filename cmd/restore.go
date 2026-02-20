@@ -63,12 +63,12 @@ func RestoreAction(c *cli.Context) error {
 	}
 	defer utils.ZeroMem(decryptedData)
 
-	braveProfilePath, err := paths.GetBraveProfilePath()
+	profilePath, err := paths.GetBrowserProfilePath(cfg.Browser)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Restoring to %s. This will overwrite existing files. Continue? [y/N]: ", braveProfilePath)
+	fmt.Printf("Restoring %s to %s. This will overwrite existing files. Continue? [y/N]: ", cfg.Browser, profilePath)
 	var confirm string
 	fmt.Scanln(&confirm)
 	if strings.ToLower(confirm) != "y" {
@@ -76,10 +76,10 @@ func RestoreAction(c *cli.Context) error {
 		return nil
 	}
 
-	if err := archive.ExtractArchive(decryptedData, braveProfilePath); err != nil {
+	if err := archive.ExtractArchive(decryptedData, profilePath); err != nil {
 		return err
 	}
 
-	fmt.Println("Restore successful! Please restart Brave browser.")
+	fmt.Printf("Restore successful! Please restart %s browser.\n", cfg.Browser)
 	return nil
 }

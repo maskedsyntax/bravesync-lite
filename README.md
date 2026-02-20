@@ -1,9 +1,10 @@
 # BraveSync Lite
 
-A local-first, security-focused backup and restore tool for Brave browser data on Linux. This tool allows you to securely archive your bookmarks and password database, encrypt them locally, and sync the encrypted blobs to a private GitHub repository.
+A local-first, security-focused backup and restore tool for Brave and Helium browser data on Linux. This tool allows you to securely archive your bookmarks and password database, encrypt them locally, and sync the encrypted blobs to a private GitHub repository.
 
 ## Features
 
+- **Multi-Browser Support**: Supports both **Brave** and **Helium** browsers.
 - **Local-First Security**: Data is encrypted on your machine before being uploaded.
 - **AES-256-GCM Encryption**: Uses industry-standard encryption with Argon2id for key derivation.
 - **Minimalist Sync**: Only syncs Bookmarks and Login Data (passwords).
@@ -22,14 +23,14 @@ go build -o bravesynclite ./cmd/bravesynclite/main.go
 Before using the tool, you must configure your GitHub repository settings. You can do this interactively or via flags.
 
 ### Interactive (Recommended)
-Simply run the config command and follow the prompts:
+Simply run the config command and follow the prompts. You will be asked to choose between Brave and Helium:
 ```bash
 ./bravesynclite config
 ```
 
 ### Via Flags
 ```bash
-./bravesynclite config --repo <your-private-repo-url> --pat <your-github-pat>
+./bravesynclite config --browser Helium --repo <your-private-repo-url> --pat <your-github-pat>
 ```
 *(The `--local` path defaults to `~/.local/share/bravesync-repo` if omitted.)*
 
