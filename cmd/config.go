@@ -1,18 +1,37 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/maskedsyntax/bravesync-lite/internal/config"
 	"github.com/urfave/cli/v2"
 )
 
+func promptInput(prompt string, current string) string {
+	reader := bufio.NewReader(os.Stdin)
+	if current != "" {
+		fmt.Printf("%s [%s]: ", prompt, current)
+	} else {
+		fmt.Printf("%s: ", prompt)
+	}
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return current
+	}
+	return input
+}
+
 func ConfigAction(c *cli.Context) error {
 	cfg, err := config.Load()
 	if err != nil {
-		// Create default if not exists
+		defaultLocal, _ := config.GetDefaultLocalClonePath()
 		cfg = &config.Config{
-			Branch: "main",
+			LocalClonePath: defaultLocal,
+			Branch:         "main",
 			Encryption: config.EncryptionConfig{
 				KDF:        "argon2id",
 				Iterations: 1,
@@ -21,37 +40,31 @@ func ConfigAction(c *cli.Context) error {
 	}
 
 	repoURL := c.String("repo")
-	if repoURL != "" {
-		cfg.GitHubRepoURL = repoURL
-	}
-
 	localPath := c.String("local")
-	if localPath != "" {
-		cfg.LocalClonePath = localPath
-	}
-
 	branch := c.String("branch")
-	if branch != "" {
-		cfg.Branch = branch
-	}
-
 	pat := c.String("pat")
-	if pat != "" {
-		cfg.PAT = pat
-	}
 
+	// If no flags are provided, enter interactive mode
 	if repoURL == "" && localPath == "" && branch == "" && pat == "" {
-		// Just print current config
-		fmt.Printf("Current Configuration:\n")
-		fmt.Printf("GitHub Repo URL:  %s\n", cfg.GitHubRepoURL)
-		fmt.Printf("Local Clone Path: %s\n", cfg.LocalClonePath)
-		fmt.Printf("Branch:           %s\n", cfg.Branch)
-		if cfg.PAT != "" {
-			fmt.Printf("PAT:              %s\n", "****")
-		} else {
-			fmt.Printf("PAT:              Not set (will use BRAVE_SYNC_PAT env var)\n")
+		fmt.Println("Entering interactive configuration mode. Press enter to keep current values.")
+		cfg.GitHubRepoURL = promptInput("GitHub Repo URL", cfg.GitHubRepoURL)
+		cfg.LocalClonePath = promptInput("Local Clone Path", cfg.LocalClonePath)
+		cfg.Branch = promptInput("Branch", cfg.Branch)
+		cfg.PAT = promptInput("GitHub PAT (leave blank to use BRAVE_SYNC_PAT env var)", cfg.PAT)
+	} else {
+		// Update only provided flags
+		if repoURL != "" {
+			cfg.GitHubRepoURL = repoURL
 		}
-		return nil
+		if localPath != "" {
+			cfg.LocalClonePath = localPath
+		}
+		if branch != "" {
+			cfg.Branch = branch
+		}
+		if pat != "" {
+			cfg.PAT = pat
+		}
 	}
 
 	if err := cfg.Save(); err != nil {

@@ -37,6 +37,15 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(home, ConfigDir, ConfigFile), nil
 }
 
+// GetDefaultLocalClonePath returns the standard default location for the local clone.
+func GetDefaultLocalClonePath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("could not get home dir: %w", err)
+	}
+	return filepath.Join(home, ".local/share/bravesync-repo"), nil
+}
+
 // Load loads the configuration from the disk.
 func Load() (*Config, error) {
 	path, err := GetConfigPath()
