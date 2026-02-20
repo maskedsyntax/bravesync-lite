@@ -19,11 +19,19 @@ go build -o bravesynclite ./cmd/bravesynclite/main.go
 
 ## Setup
 
-Before using the tool, you must configure your GitHub repository settings and Personal Access Token (PAT).
+Before using the tool, you must configure your GitHub repository settings. You can do this interactively or via flags.
 
+### Interactive (Recommended)
+Simply run the config command and follow the prompts:
 ```bash
-./bravesynclite config --repo <your-private-repo-url> --local ~/.local/share/brave-sync-repo --pat <your-github-pat>
+./bravesynclite config
 ```
+
+### Via Flags
+```bash
+./bravesynclite config --repo <your-private-repo-url> --pat <your-github-pat>
+```
+*(The `--local` path defaults to `~/.local/share/bravesync-repo` if omitted.)*
 
 Alternatively, you can set the `BRAVE_SYNC_PAT` environment variable instead of storing it in the config file.
 
